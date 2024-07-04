@@ -97,7 +97,10 @@ class Bot(commands.Bot):
 
     async def setup_hook(self) -> None:
         self.logger.info("setting up commands...")
-        await self.add_cog(Commands(self, self.rcon))
+        cog = Commands(self, self.rcon)
+        await self.add_cog(cog)
 
         self.logger.info("syncing commands...")
         await self.tree.sync()
+
+        self.logger.info("finished setting up bot...")
