@@ -18,7 +18,7 @@ class Commands(commands.Cog):
         self.rcon = rcon
         self.logger = logging.getLogger("bot.commands")
 
-    @app_commands.command()
+    @app_commands.command(name="players")
     async def players(self, interaction: Interaction):
         """
         Checks for online players
@@ -37,7 +37,7 @@ class Commands(commands.Cog):
             f"online players: {players}", ephemeral=True
         )
 
-    @app_commands.command()
+    @app_commands.command(name="check_for_mod_updates")
     async def check_for_mod_updates(self, interaction: Interaction):
         """
         Checks if mods need updating
@@ -55,7 +55,7 @@ class Commands(commands.Cog):
         )
 
     # @app_commands.command(name="restart_server")
-    # async def command_restart_server(self, interaction: Interaction):
+    # async def restart_server(self, interaction: Interaction):
     #     """
     #     Restarts server
     #     """
