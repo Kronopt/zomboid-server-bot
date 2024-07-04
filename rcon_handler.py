@@ -1,4 +1,5 @@
 import os
+import re
 from typing import List
 from rcon.source import rcon
 
@@ -16,17 +17,24 @@ class RCON:
             "players", host=self.host, port=self.port, passwd=self.password
         )
 
-        # first line of response is informative
-        # all other lines are player names
-        return response.split("\n")[1:]
+        # first line of response is informative, ex:
+        #   players online: Players connected (3):
+        # all other lines are player names in the form of "-{name}", ex:
+        #   -player1
+        #   -player2
+        return response.split("\n-")[1:]
 
-    async def update_mods(self):
-        await rcon(
+    async def mods_need_updating(self) -> bool:
+        response = await rcon(
             "checkModsNeedUpdate",
             host=self.host,
             port=self.port,
             passwd=self.password,
         )
+
+        # if there are mod updates available, the following line shows up:
+        #   CheckModsNeedUpdate: Mods need update
+        return re.search("Mods need update", response, re.IGNORECASE) is not None
 
     async def restart_server(self):
         await rcon("quit", host=self.host, port=self.port, passwd=self.password)
