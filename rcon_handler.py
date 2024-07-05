@@ -23,18 +23,6 @@ class RCON:
         #   -player2
         return response.replace("-", "").strip().split("\n")[1:]
 
-    async def mods_need_updating(self) -> bool:
-        response = await rcon(
-            "checkModsNeedUpdate",
-            host=self.host,
-            port=self.port,
-            passwd=self.password,
-        )
-
-        # if there are mod updates available, the following line shows up:
-        #   CheckModsNeedUpdate: Mods need update
-        return "Mods need update" in response
-
     async def restart_server(self):
         await rcon("quit", host=self.host, port=self.port, passwd=self.password)
 

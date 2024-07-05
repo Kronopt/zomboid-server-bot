@@ -32,25 +32,9 @@ class Commands(commands.Cog):
             )
             return
 
+        formatted_players = [f"  🧟 {player}\n" for player in players]
         await interaction.response.send_message(
-            f"online players: {players}", ephemeral=True
-        )
-
-    @app_commands.command(name="check_for_mod_updates")
-    async def check_for_mod_updates(self, interaction: Interaction):
-        """
-        Checks if mods need updating
-        """
-        self.log_command_call(interaction, "check_for_mod_updates")
-
-        if await self.rcon.mods_need_updating():
-            await interaction.response.send_message(
-                "⬆️ some mods have updates available", ephemeral=True
-            )
-            return
-
-        await interaction.response.send_message(
-            "✅ all mods are up to date", ephemeral=True
+            f"online players:\n{formatted_players}", ephemeral=True
         )
 
     # @app_commands.command(name="restart_server")
