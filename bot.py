@@ -36,25 +36,25 @@ class Commands(commands.Cog):
         for player in players:
             formatted_players += f"\n  🧟 {player}"
 
+        await interaction.response.send_message(f"online players:{formatted_players}")
+
+    @app_commands.command(name="restart_server")
+    async def restart_server(self, interaction: Interaction):
+        """
+        Restarts server
+        """
+        self.log_command_call(interaction, "restart_server")
+
+        if len(await self.rcon.online_players()) != 0:
+            await interaction.response.send_message(
+                "❌ can't restart server because there are players online"
+            )
+            return
+
         await interaction.response.send_message(
-            f"online players:{formatted_players}", ephemeral=True
+            "🔧 server is being restarted and mods updated"
         )
-
-    # @app_commands.command(name="restart_server")
-    # async def restart_server(self, interaction: Interaction):
-    #     """
-    #     Restarts server
-    #     """
-    #     self.log_command_call(interaction, "restart_server")
-
-    #     if len(await self.rcon.online_players()) != 0:
-    #         await interaction.response.send_message(
-    #             "can't restart server because there are players online"
-    #         )
-    #         return
-
-    #     await self.rcon.restart_server()
-    #     await interaction.response.send_message("mods are being updated")
+        await self.rcon.restart_server()
 
     def log_command_call(self, interaction: "Interaction", command_name: str):
         logger = logging.getLogger(f"bot.commands.{command_name}")

@@ -1,3 +1,4 @@
+import asyncio
 import os
 from typing import List
 from rcon.source import rcon
@@ -25,7 +26,9 @@ class RCON:
 
     async def restart_server(self):
         await rcon("quit", host=self.host, port=self.port, passwd=self.password)
+        await asyncio.sleep(30)
 
         os.system(
-            "cd /opt/pzserver/ && bash start-server.sh -servername server-sophie-1-12-1"
+            "tmux send-keys -t zomboid-server"
+            + " 'cd /opt/pzserver/ && bash start-server.sh -servername server-sophie-1-12-1' C-m"
         )
