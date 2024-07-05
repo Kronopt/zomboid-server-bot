@@ -16,7 +16,6 @@ class Commands(commands.Cog):
         super().__init__()
         self.bot = bot
         self.rcon = rcon
-        self.logger = logging.getLogger("bot.commands")
 
     @app_commands.command(name="players")
     async def players(self, interaction: Interaction):
@@ -42,7 +41,7 @@ class Commands(commands.Cog):
         """
         Checks if mods need updating
         """
-        self.log_command_call(interaction, "update_mods")
+        self.log_command_call(interaction, "check_for_mod_updates")
 
         if await self.rcon.mods_need_updating():
             await interaction.response.send_message(
@@ -71,6 +70,8 @@ class Commands(commands.Cog):
     #     await interaction.response.send_message("mods are being updated")
 
     def log_command_call(self, interaction: "Interaction", command_name: str):
+        logger = logging.getLogger(f"bot.commands.{command_name}")
+
         guild = interaction.guild
         channel = interaction.channel
         channel = (
@@ -79,7 +80,7 @@ class Commands(commands.Cog):
             else "Private Message"
         )
         user = f"{interaction.user.name}#{interaction.user.discriminator}"
-        self.logger.info(f".{command_name}: channel: {channel}: user: {user}")
+        logger.info(f"channel: {channel}: user: {user}")
 
 
 class Bot(commands.Bot):
