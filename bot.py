@@ -32,9 +32,12 @@ class Commands(commands.Cog):
             )
             return
 
-        formatted_players = [f"  🧟 {player}\n" for player in players]
+        formatted_players = ""
+        for player in players:
+            formatted_players += f"\n  🧟 {player}"
+
         await interaction.response.send_message(
-            f"online players:\n{formatted_players}", ephemeral=True
+            f"online players:{formatted_players}", ephemeral=True
         )
 
     # @app_commands.command(name="restart_server")
