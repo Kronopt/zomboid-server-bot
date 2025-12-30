@@ -72,14 +72,14 @@ class Commands(commands.Cog):
 
 class Bot(commands.Bot):
 
-    def __init__(self, rcon_port: int, rcon_password: str):
+    def __init__(self, rcon_port: int, rcon_password: str, server_path: str, running_server_name: str):
         self.logger = logging.getLogger("bot")
         self.logger.info("starting bot...")
 
         intents = discord.Intents.default()
         intents.message_content = True
 
-        self.rcon = rcon_handler.RCON(rcon_port, rcon_password)
+        self.rcon = rcon_handler.RCON(rcon_port, rcon_password, server_path, running_server_name)
 
         super().__init__(command_prefix=commands.when_mentioned, intents=intents)
 
