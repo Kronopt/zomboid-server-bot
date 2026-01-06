@@ -55,6 +55,28 @@ class Commands(commands.Cog):
             "🔧 server is being restarted and mods updated"
         )
         await self.rcon.restart_server()
+    
+    @app_commands.command(name="list_settings")
+    async def list_settings(self, interaction: Interaction):
+        """
+        List current server settings
+        """
+        self.log_command_call(interaction, "list_settings")
+
+        settings = await self.rcon.list_current_settings()
+
+        await interaction.response.send_message(f"🔧 server settings:\n\n{settings}")
+    
+    @app_commands.command(name="change_setting")
+    async def change_setting(self, interaction: Interaction, setting: str, value: str):
+        """
+        Change a server setting
+        """
+        self.log_command_call(interaction, "change_setting")
+
+        response = await self.rcon.change_setting(setting, value)
+
+        await interaction.response.send_message(response)
 
     def log_command_call(self, interaction: "Interaction", command_name: str):
         logger = logging.getLogger(f"bot.commands.{command_name}")
