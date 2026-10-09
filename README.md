@@ -11,6 +11,8 @@ The bot registers two slash commands:
 | `/players`        | Lists the players currently connected. If nobody is online it replies with a message only the caller can see. |
 | `/restart_server` | Restarts the server, but only when nobody is online. It sends `quit` over RCON, waits 30 seconds, then starts the server again inside a tmux session. Mods are updated when the server starts. |
 
+By default anyone in your Discord server can use these commands. To limit them to certain roles, start the bot with `--allowed_roles` (see [Restricting commands to roles](#restricting-commands-to-roles)).
+
 ### How it works
 
 ```
@@ -70,12 +72,25 @@ python main.py <token> <rcon_port> <rcon_password> <running_server_name> [-p SER
 | `rcon_password`       | The server's RCON password (`RCONPassword` in the server `.ini`) |
 | `running_server_name` | Server name used with `-servername` (for example `server-sophie-1-12-1`) |
 | `-p`, `--server_path` | Full path to the dedicated server install folder, which contains `start-server.sh`. Default: `/opt/pzserver/` |
+| `-r`, `--allowed_roles` | Comma-separated names or IDs of the Discord roles whose members can use the commands, for example `"Admin,Moderator"`. If you leave it out or pass an empty value, everyone can use them. |
 
 Example:
 
 ```bash
 python main.py "$DISCORD_TOKEN" 27015 "$RCON_PASSWORD" server-sophie-1-12-1 -p /opt/pzserver/
 ```
+
+### Restricting commands to roles
+
+Pass `--allowed_roles` to limit the commands to members of one or more Discord roles. Separate the roles with commas. A user needs **any one** of the listed roles:
+
+```bash
+python main.py "$DISCORD_TOKEN" 27015 "$RCON_PASSWORD" server-sophie-1-12-1 --allowed_roles "Zomboid Admin,Moderator,123456789012345678"
+```
+
+- Each entry can be a role **name** or a role **ID**, and you can mix the two. Spaces around the commas are ignored. Names must match exactly, including capitalization, and can't contain commas. An ID keeps working if the role is renamed. To copy a role's ID, turn on Developer Mode in Discord's settings, then right-click the role.
+- Users without any of the roles get a "🚫 you don't have permission" reply that only they can see. The attempt is logged.
+- When any roles are set, the commands don't work in private messages with the bot, because a private message has no roles to check.
 
 Slash commands can take a few minutes to show up in Discord the first time the bot syncs them.
 
@@ -155,13 +170,14 @@ RCON_PORT=27015
 RCON_PASSWORD=...
 SERVER_NAME=server-sophie-1-12-1
 SERVER_PATH=/opt/pzserver/
+ALLOWED_ROLES=          # optional: comma-separated role names or IDs, empty = everyone. Quote values with spaces: "Zomboid Admin,Moderator"
 ```
 
 Start the bot in its own tmux session, `zomboid-bot`:
 
 ```bash
 tmux new -d -s zomboid-bot
-tmux send-keys -t zomboid-bot 'cd ~/zomboid-server-bot && set -a && source .env && set +a && .venv/bin/python main.py "$DISCORD_TOKEN" "$RCON_PORT" "$RCON_PASSWORD" "$SERVER_NAME" -p "$SERVER_PATH"' C-m
+tmux send-keys -t zomboid-bot 'cd ~/zomboid-server-bot && set -a && source .env && set +a && .venv/bin/python main.py "$DISCORD_TOKEN" "$RCON_PORT" "$RCON_PASSWORD" "$SERVER_NAME" -p "$SERVER_PATH" -r "$ALLOWED_ROLES"' C-m
 ```
 
 To see the bot's logs, run `tmux attach -t zomboid-bot`, then detach with `Ctrl+b`, `d`. The command runs inside a shell, so if the bot crashes the session stays open and you can still read the error.
@@ -175,14 +191,14 @@ cd ~/zomboid-server-bot
 git pull
 .venv/bin/pip install -r requirements.txt
 tmux send-keys -t zomboid-bot C-c        # stop the bot
-tmux send-keys -t zomboid-bot 'cd ~/zomboid-server-bot && set -a && source .env && set +a && .venv/bin/python main.py "$DISCORD_TOKEN" "$RCON_PORT" "$RCON_PASSWORD" "$SERVER_NAME" -p "$SERVER_PATH"' C-m
+tmux send-keys -t zomboid-bot 'cd ~/zomboid-server-bot && set -a && source .env && set +a && .venv/bin/python main.py "$DISCORD_TOKEN" "$RCON_PORT" "$RCON_PASSWORD" "$SERVER_NAME" -p "$SERVER_PATH" -r "$ALLOWED_ROLES"' C-m
 ```
 
 ## Security notes
 
 - Secrets are passed as command-line arguments, so other users on the host can see them in `ps`. Run the bot on a host you control, and keep the `.env` file `chmod 600`.
 - Never expose the RCON port publicly. The bot only needs it on `127.0.0.1`.
-- Anyone who can see the slash commands in your Discord server can use `/restart_server`. It refuses to restart while players are online, but you can restrict who can use it under **Server Settings → Integrations → \<your bot\>** in Discord.
+- Unless you set `--allowed_roles`, anyone in your Discord server can use `/restart_server`. It refuses to restart while players are online, but setting allowed roles is recommended. You can also hide the commands from users under **Server Settings → Integrations → \<your bot\>** in Discord.
 
 ## Known limitations
 
